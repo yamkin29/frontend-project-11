@@ -1,7 +1,14 @@
 import onChange from 'on-change'
+import i18nReady from './i18next.js'
 
-const setFeedback = (element, message, kind) => {
-  element.textContent = message
+const setFeedback = (element, codeOrText, kind) => {
+  const t = window.i18n.t.bind(window.i18n)
+  const text
+    = typeof codeOrText === 'string' && (codeOrText.startsWith('errors.') || codeOrText.startsWith('ui.'))
+      ? t(codeOrText)
+      : (codeOrText || '')
+
+  element.textContent = text
   element.classList.remove('text-success', 'text-danger')
   element.classList.add(kind === 'success' ? 'text-success' : 'text-danger')
 }
@@ -17,48 +24,41 @@ const renderFeeds = (feeds, listEl) => {
 }
 
 export default function initView(state, elements) {
-  renderFeeds(state.feeds, elements.feeds)
+  return i18nReady.then((i18nextInstance) => {
+    window.i18n = i18nextInstance
 
-  return onChange(state, (path, value) => {
-    switch (path) {
-      case 'form.status': {
-        const disabled = value === 'processing'
-        elements.button.disabled = disabled
-        if (state.form.error) {
-          elements.input.classList.add('is-invalid')
+    renderFeeds(state.feeds, elements.feeds)
+
+    const watched = onChange(state, (path, value) => {
+      switch (path) {
+        case 'form.status': {
+          elements.button.disabled = value === 'processing'
+          break
         }
-        else {
-          elements.input.classList.remove('is-invalid')
+        case 'form.error': {
+          if (value) {
+            elements.input.classList.add('is-invalid')
+            setFeedback(elements.feedback, value, 'error')
+          }
+          else {
+            elements.input.classList.remove('is-invalid')
+            setFeedback(elements.feedback, '', 'success')
+          }
+          break
         }
-        break
+        case 'form.success': {
+          if (value) setFeedback(elements.feedback, value, 'success')
+          break
+        }
+        case 'feeds': {
+          renderFeeds(value, elements.feeds)
+          break
+        }
+        default:
+          break
       }
+    })
 
-      case 'form.error': {
-        if (value) {
-          setFeedback(elements.feedback, value, 'error')
-          elements.input.classList.add('is-invalid')
-        }
-        else {
-          elements.input.classList.remove('is-invalid')
-          setFeedback(elements.feedback, '', 'success')
-        }
-        break
-      }
-
-      case 'form.success': {
-        if (value) {
-          setFeedback(elements.feedback, value, 'success')
-        }
-        break
-      }
-
-      case 'feeds': {
-        renderFeeds(value, elements.feeds)
-        break
-      }
-
-      default:
-        break
-    }
+    return watched
   })
 }

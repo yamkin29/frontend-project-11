@@ -12,42 +12,37 @@ const els = {
 }
 
 const state = {
-  form: {
-    status: 'idle',
-    error: null,
-    success: null,
-  },
+  form: { status: 'idle', error: null, success: null },
   feeds: [],
 }
 
-const watched = initView(state, els)
+initView(state, els).then((watched) => {
+  const resetFormState = () => {
+    watched.form.error = null
+    watched.form.success = null
+  }
 
-const resetFormState = () => {
-  watched.form.error = null
-  watched.form.success = null
-}
+  els.form.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const url = els.input.value.trim()
 
-els.form.addEventListener('submit', (e) => {
-  e.preventDefault()
-  const url = els.input.value.trim()
-
-  Promise.resolve()
-    .then(() => {
-      resetFormState()
-      watched.form.status = 'processing'
-    })
-    .then(() => validateUrl(url, watched.feeds))
-    .then(() => {
-      // TODO: здесь позже будет fetch(url) и парсинг RSS
-      watched.feeds = [...watched.feeds, url]
-      watched.form.success = 'RSS успешно добавлен'
-      els.form.reset()
-      els.input.focus()
-    })
-    .catch((err) => {
-      watched.form.error = err.message
-    })
-    .finally(() => {
-      watched.form.status = 'idle'
-    })
+    Promise.resolve()
+      .then(() => {
+        resetFormState()
+        watched.form.status = 'processing'
+      })
+      .then(() => validateUrl(url, watched.feeds))
+      .then(() => {
+        watched.feeds = [...watched.feeds, url]
+        watched.form.success = 'ui.successAdded'
+        els.form.reset()
+        els.input.focus()
+      })
+      .catch((err) => {
+        watched.form.error = err.message
+      })
+      .finally(() => {
+        watched.form.status = 'idle'
+      })
+  })
 })
