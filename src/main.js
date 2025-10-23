@@ -6,6 +6,8 @@ import { validateUrl } from './validator.js'
 import { parseRss } from './parser.js'
 import { uid } from './id.js'
 
+const POLL_INTERVAL = 5000
+
 const els = {
   form: document.querySelector('.rss-form'),
   input: document.getElementById('url-input'),
@@ -24,9 +26,46 @@ const state = {
   posts: [],
 }
 
-const getExistingUrls = st => st.feeds.map(f => f.url)
+const fetchAndMergeFeed = (feed, watched) =>
+  axios.get(makeProxyUrl(feed.url))
+    .then(({ data }) => {
+      const { posts } = parseRss(data.contents)
+
+      const known = new Set(
+        watched.posts.filter(p => p.feedId === feed.id).map(p => p.link),
+      )
+
+      const newOnes = posts
+        .filter(p => !known.has(p.link))
+        .map(p => ({
+          id: uid('post'),
+          feedId: feed.id,
+          title: p.title,
+          link: p.link,
+          description: p.description,
+        }))
+
+      if (newOnes.length > 0) {
+        watched.posts = [...newOnes, ...watched.posts]
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+
+const startPolling = (watched) => {
+  const runCycle = () =>
+    Promise.all(watched.feeds.map(feed => fetchAndMergeFeed(feed, watched)))
+      .finally(() => {
+        setTimeout(runCycle, POLL_INTERVAL)
+      })
+
+  runCycle()
+}
 
 initView(state, els).then((watched) => {
+  startPolling(watched)
+
   const resetFormState = () => {
     watched.form.error = null
     watched.form.success = null
@@ -35,18 +74,17 @@ initView(state, els).then((watched) => {
   els.form.addEventListener('submit', (e) => {
     e.preventDefault()
     const url = els.input.value.trim()
-    const urls = getExistingUrls(watched)
+    const existingUrls = watched.feeds.map(f => f.url)
 
     Promise.resolve()
       .then(() => {
         resetFormState()
         watched.form.status = 'processing'
       })
-      .then(() => validateUrl(url, urls))
+      .then(() => validateUrl(url, existingUrls))
       .then(() => axios.get(makeProxyUrl(url)))
       .then(({ data }) => {
-        const xml = data.contents
-        const { title, description, posts } = parseRss(xml)
+        const { title, description, posts } = parseRss(data.contents)
 
         const feedId = uid('feed')
         const feed = { id: feedId, url, title, description }
