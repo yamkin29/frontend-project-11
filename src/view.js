@@ -1,4 +1,5 @@
 import onChange from 'on-change'
+import { Modal } from 'bootstrap'
 import i18nReady from './i18next.js'
 
 const setFeedback = (element, codeOrText, kind) => {
@@ -32,7 +33,7 @@ const renderFeeds = (feeds, boxEl) => {
   })
 }
 
-const renderPosts = (posts, boxEl) => {
+const renderPosts = (posts, readPostsIds, boxEl) => {
   boxEl.innerHTML = ''
   posts.forEach((post) => {
     const li = document.createElement('li')
@@ -42,9 +43,18 @@ const renderPosts = (posts, boxEl) => {
     a.setAttribute('href', post.link)
     a.setAttribute('target', '_blank')
     a.setAttribute('rel', 'noopener noreferrer')
+    a.dataset.id = post.id
+    a.className = readPostsIds.includes(post.id) ? 'fw-normal' : 'fw-bold'
     a.textContent = post.title
 
-    li.appendChild(a)
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'btn btn-outline-primary btn-sm ms-3'
+    btn.dataset.role = 'preview'
+    btn.dataset.id = post.id
+    btn.textContent = 'Просмотр'
+
+    li.append(a, btn)
     boxEl.appendChild(li)
   })
 }
@@ -54,7 +64,20 @@ export default function initView(state, elements) {
     window.i18n = i18nextInstance
 
     renderFeeds(state.feeds, elements.feeds)
-    renderPosts(state.posts, elements.posts)
+    renderPosts(state.posts, state.readPosts, elements.posts)
+
+    const bsModal = new Modal(elements.modal.element)
+
+    const openModalFor = (postId, currentState) => {
+      const post = currentState.posts.find(p => p.id === postId)
+      if (!post) return
+
+      elements.modal.title.textContent = post.title
+      elements.modal.body.textContent = post.description || ''
+      elements.modal.link.setAttribute('href', post.link)
+
+      bsModal.show()
+    }
 
     const watched = onChange(state, (path, value) => {
       switch (path) {
@@ -82,11 +105,43 @@ export default function initView(state, elements) {
           break
         }
         case 'posts': {
-          renderPosts(value, elements.posts)
+          renderPosts(value, state.readPosts, elements.posts)
+          break
+        }
+        case 'readPosts': {
+          renderPosts(state.posts, value, elements.posts)
+          break
+        }
+        case 'ui.modalPostId': {
+          if (value) openModalFor(value, state)
           break
         }
         default:
           break
+      }
+    })
+
+    elements.posts.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-role="preview"]')
+      const link = e.target.closest('a[data-id]')
+
+      const markRead = (id) => {
+        if (!watched.readPosts.includes(id)) {
+          watched.readPosts = [...watched.readPosts, id]
+        }
+      }
+
+      if (btn) {
+        const id = btn.dataset.id
+        markRead(id)
+        if (!watched.ui) watched.ui = { modalPostId: null }
+        watched.ui.modalPostId = id
+        return
+      }
+
+      if (link) {
+        const id = link.dataset.id
+        markRead(id)
       }
     })
 

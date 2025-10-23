@@ -15,16 +15,24 @@ const els = {
   feedback: document.querySelector('.feedback'),
   feeds: document.querySelector('.feeds .list-group'),
   posts: document.querySelector('.posts .list-group'),
+  modal: {
+    element: document.getElementById('modal'),
+    title: document.getElementById('modal-title'),
+    body: document.getElementById('modal-body'),
+    link: document.querySelector('#modal .full-article'),
+  },
 }
-
-const makeProxyUrl = url =>
-  `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`
 
 const state = {
   form: { status: 'idle', error: null, success: null },
   feeds: [],
   posts: [],
+  readPosts: [],
+  ui: { modalPostId: null },
 }
+
+const makeProxyUrl = url =>
+  `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`
 
 const fetchAndMergeFeed = (feed, watched) =>
   axios.get(makeProxyUrl(feed.url))
