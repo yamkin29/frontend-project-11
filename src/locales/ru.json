@@ -2,12 +2,15 @@
   "ui": {
     "title": "RSS агрегатор",
     "lead": "Начните читать RSS сегодня! Это легко, это красиво.",
-    "example": "Пример: https://lorem-rss.hexlet.app/feed",
-    "feeds": "Ленты",
-    "posts": "Посты",
-    "add": "Добавить",
     "label": "Ссылка RSS",
-    "successAdded": "RSS успешно добавлен"
+    "add": "Добавить",
+    "example": "Пример: https://lorem-rss.hexlet.app/feed",
+    "posts": "Посты",
+    "feeds": "Фиды",
+    "preview": "Просмотр",
+    "close": "Закрыть",
+    "readFull": "Читать полностью",
+    "successAdded": "RSS успешно загружен"
   },
   "errors": {
     "required": "Ссылка не должна быть пустой",

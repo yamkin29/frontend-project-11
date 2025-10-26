@@ -13,8 +13,8 @@ const els = {
   input: document.getElementById('url-input'),
   button: document.getElementById('add-button') || document.querySelector('button[type="submit"]'),
   feedback: document.querySelector('.feedback'),
-  feeds: document.querySelector('.feeds .list-group'),
-  posts: document.querySelector('.posts .list-group'),
+  feeds: document.querySelector('.feeds'),
+  posts: document.querySelector('.posts'),
   modal: {
     element: document.getElementById('modal'),
     title: document.getElementById('modal-title'),

@@ -14,11 +14,31 @@ const setFeedback = (element, codeOrText, kind) => {
   element.classList.add(kind === 'success' ? 'text-success' : 'text-danger')
 }
 
-const renderFeeds = (feeds, boxEl) => {
-  boxEl.innerHTML = ''
+const renderFeeds = (feeds, colEl) => {
+  if (!feeds || feeds.length === 0) {
+    colEl.classList.add('d-none')
+    colEl.innerHTML = ''
+    return
+  }
+
+  colEl.classList.remove('d-none')
+
+  const card = document.createElement('div')
+  card.className = 'card border-0'
+
+  const body = document.createElement('div')
+  body.className = 'card-body'
+
+  const h2 = document.createElement('h2')
+  h2.className = 'card-title h4'
+  h2.textContent = 'Фиды'
+
+  const list = document.createElement('ul')
+  list.className = 'list-group border-0 rounded-0'
+
   feeds.forEach((feed) => {
     const li = document.createElement('li')
-    li.className = 'list-group-item'
+    li.className = 'list-group-item border-0 border-end-0'
 
     const h3 = document.createElement('h3')
     h3.className = 'h6 m-0'
@@ -29,34 +49,64 @@ const renderFeeds = (feeds, boxEl) => {
     p.textContent = feed.description
 
     li.append(h3, p)
-    boxEl.appendChild(li)
+    list.appendChild(li)
   })
+
+  body.appendChild(h2)
+  card.append(body, list)
+  colEl.innerHTML = ''
+  colEl.appendChild(card)
 }
 
-const renderPosts = (posts, readPostsIds, boxEl) => {
-  boxEl.innerHTML = ''
+const renderPosts = (posts, readIds, colEl) => {
+  if (!posts || posts.length === 0) {
+    colEl.classList.add('d-none')
+    colEl.innerHTML = ''
+    return
+  }
+
+  colEl.classList.remove('d-none')
+
+  const card = document.createElement('div')
+  card.className = 'card border-0'
+
+  const body = document.createElement('div')
+  body.className = 'card-body'
+
+  const h2 = document.createElement('h2')
+  h2.className = 'card-title h4'
+  h2.textContent = 'Посты'
+
+  const list = document.createElement('ul')
+  list.className = 'list-group border-0 rounded-0'
+
   posts.forEach((post) => {
     const li = document.createElement('li')
-    li.className = 'list-group-item d-flex justify-content-between align-items-start'
+    li.className = 'list-group-item d-flex justify-content-between align-items-start border-0 border-end-0'
 
     const a = document.createElement('a')
-    a.setAttribute('href', post.link)
-    a.setAttribute('target', '_blank')
-    a.setAttribute('rel', 'noopener noreferrer')
+    a.href = post.link
+    a.target = '_blank'
+    a.rel = 'noopener noreferrer'
     a.dataset.id = post.id
-    a.className = readPostsIds.includes(post.id) ? 'fw-normal' : 'fw-bold'
+    a.className = readIds.includes(post.id) ? 'fw-normal' : 'fw-bold'
     a.textContent = post.title
 
     const btn = document.createElement('button')
     btn.type = 'button'
-    btn.className = 'btn btn-outline-primary btn-sm ms-3'
+    btn.className = 'btn btn-outline-primary btn-sm'
     btn.dataset.role = 'preview'
     btn.dataset.id = post.id
     btn.textContent = 'Просмотр'
 
     li.append(a, btn)
-    boxEl.appendChild(li)
+    list.appendChild(li)
   })
+
+  body.appendChild(h2)
+  card.append(body, list)
+  colEl.innerHTML = ''
+  colEl.appendChild(card)
 }
 
 export default function initView(state, elements) {
