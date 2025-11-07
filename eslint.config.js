@@ -8,7 +8,7 @@ export default [
       'node_modules/**',
       'dist/**',
       'coverage/**',
-      'eslint.config.js',
+      '**/eslint.config.js',
     ],
   },
 
