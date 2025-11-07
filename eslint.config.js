@@ -16,7 +16,7 @@ export default [
   stylistic.configs.recommended,
 
   {
-    files: ['src/**/*.{js,ts,tsx}'],
+    files: ['**/*.{js,ts,tsx}'],
     languageOptions: {
       sourceType: 'module',
       ecmaVersion: 'latest',
