@@ -27,6 +27,9 @@ export default [
     },
     rules: {
       '@stylistic/indent': ['error', 2, { SwitchCase: 1 }],
+      '@stylistic/quotes': ['error', 'single'],
+      '@stylistic/semi': ['error', 'never'],
+      '@stylistic/eol-last': ['error', 'always'],
     },
   },
 ]
