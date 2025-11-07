@@ -1,6 +1,6 @@
 import pluginJs from '@eslint/js'
 import stylistic from '@stylistic/eslint-plugin'
-import globals from 'globals';
+import globals from 'globals'
 
 export default [
   {
